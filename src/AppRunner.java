@@ -52,7 +52,7 @@ public class AppRunner {
     }
 
     private Predicate<Long> getFilter(String filter) {
-        return switch (filter) {
+        return switch (filter.toLowerCase()) {
             case "buzz" -> BuzzNumber.isBuzzNumber;
             case "duck" -> DuckNumber.isDuckNumber;
             case "palindromic" -> PalindromicNumber.isPalindromic;
@@ -111,7 +111,8 @@ public class AppRunner {
                 "- enter a natural number to know its properties;\n" +
                 "- enter two natural numbers to obtain the properties of the list:\n" +
                 "  * the first parameter represents a starting number;\n" +
-                "  * the second parameter shows how many consecutive numbers are to be processed;\n" +
+                "  * the second parameter shows how many consecutive numbers are to be printed;\n" +
+                "- two natural numbers and a property to search for;\n" +
                 "- separate the parameters with one space;\n" +
                 "- enter 0 to exit.\n");
     }
