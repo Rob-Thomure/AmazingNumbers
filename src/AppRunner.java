@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 public class AppRunner {
@@ -31,7 +32,7 @@ public class AppRunner {
                 executeTwoParameters(userRequest);
             } else if (userRequest.size() == 3) {
                 executeThreeParameters(userRequest);
-            } else if (userRequest.size() == 4) {
+            } else if (userRequest.size() >= 4) {
                 executeFourParameter(userRequest);
             }
         }
@@ -72,56 +73,89 @@ public class AppRunner {
     }
 
     public void executeFourParameter(List<String> parameters) {
-        List<String> properties = List.of(parameters.get(2), parameters.get(3));
-        Predicate<Long> firstFilter = getFilter(parameters.get(2));
-        Predicate<Long> secondFilter = getFilter(parameters.get(3));
+        List<String> properties = parameters.stream()
+                .skip(2)
+                .toList();
         if (isNumber.and(isNaturalNumber).negate().test(parameters.get(0))) {
             System.out.println("The first parameter should be a natural number or zero.\n");
         } else if (isNumber.and(isNaturalNumber).negate().test(parameters.get(1))) {
             System.out.println("The second parameter should be a natural number or zero.\n");
+        } else if (!isValidProperties(properties)) {
+            List<String> invalidProperties = createInvalidPropertyList(properties);
+            printInvalidProperties(invalidProperties);
         } else if (isMutuallyExclusiveParameters(properties)) {
             System.out.printf("The request contains mutually exclusive properties: [%s]\n" +
-                    "There are no numbers with these properties.\n\n", String.join(", ", properties));
-        } else if (!isMutuallyExclusiveParameters(properties) && null != firstFilter && null != secondFilter) {
-            printTwoFilteredPropertyList(Long.parseLong(parameters.get(0)), Long.parseLong(parameters.get(1)),
-                    firstFilter, secondFilter);
-        } else {
-            List<String> invalidProperties = createInvalidPropertyList(parameters);
-            printInvalidProperties(invalidProperties);
+                    "There are no numbers with these properties.\n\n", String.join(", ",
+                    getMutuallyExclusiveProperties(properties)));
+        } else if (!isMutuallyExclusiveParameters(properties) && isValidProperties(properties)) {
+            Predicate<Long> compositePredicate =  composePredicates(properties);
+            printMultiFilteredPropertyList(Long.parseLong(parameters.get(0)), Long.parseLong(parameters.get(1)),
+                    compositePredicate);
         }
     }
 
+    public boolean isValidProperties(List<String> properties) {
+        List<String> validProperties = List.of("EVEN", "ODD", "BUZZ", "DUCK", "PALINDROMIC", "GAPFUL", "SPY", "SQUARE",
+                "SUNNY", "JUMPING");
+        for (var element : properties) {
+            if (!validProperties.contains(element.toUpperCase())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public List<String> getMutuallyExclusiveProperties(List<String> properties) {
+        List<String> capitalProperties = properties.stream().map(String::toUpperCase).collect(Collectors.toList());
+       return mutuallyExclusiveProperties.stream()
+                .filter(element -> capitalProperties.containsAll(element))
+               .flatMap(e -> e.stream())
+               .collect(Collectors.toList());
+    }
+
+    public Predicate<Long> composePredicates(List<String> parameters) {
+         return parameters.stream()
+                .map(this::getFilter)
+                .reduce(pr -> true, Predicate::and);
+    }
+
     private boolean isMutuallyExclusiveParameters(List<String> properties) {
+        List<String> capitalProperties = properties.stream().map(str -> str.toUpperCase()).collect(Collectors.toList());
         for (var mutuallyExclusive : mutuallyExclusiveProperties) {
-            if (mutuallyExclusive.contains(properties.get(0).toUpperCase())
-                    && mutuallyExclusive.contains(properties.get(1).toUpperCase())) {
+            if (capitalProperties.containsAll(mutuallyExclusive)) {
                 return true;
             }
         }
         return false;
     }
 
-
-
     private List<String> createInvalidPropertyList(List<String> properties) {
-        List<String> invalidProperties = new ArrayList<>();
         List<String> validProperties = List.of("EVEN", "ODD", "BUZZ", "DUCK", "PALINDROMIC", "GAPFUL", "SPY", "SQUARE",
-                "SUNNY");
-        if (!validProperties.contains(properties.get(2).toUpperCase())) invalidProperties.add(properties.get(2));
-        if (!validProperties.contains(properties.get(3).toUpperCase())) invalidProperties.add(properties.get(3));
-        return invalidProperties;
+                "SUNNY", "JUMPING");
+        return properties.stream()
+                .filter(str -> !validProperties.contains(str.toUpperCase()))
+                .collect(Collectors.toList());
     }
 
     private void printInvalidProperties(List<String> properties) {
         if (properties.size() == 1) {
             System.out.printf("The property [%s] is wrong.\n" +
-                    "Available properties: [EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY]\n\n"
+                    "Available properties: [EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY, JUMPING]\n\n"
                     ,properties.get(0));
-        } else if (properties.size() == 2) {
+        } else if (properties.size() >= 2) {
             System.out.printf("The properties [%s] are wrong.\n" +
-                    "Available properties: [EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY]\n\n"
+                    "Available properties: [EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY, JUMPING]\n\n"
                     ,String.join(", ", properties));
         }
+    }
+
+    private void printMultiFilteredPropertyList(Long num, Long occurrences, Predicate<Long> compositeFilter) {
+        LongStream.iterate(num, i -> i + 1)
+                .boxed()
+                .filter(compositeFilter)
+                .limit(occurrences)
+                .forEach(this::printPropertyList);
+        System.out.println();
     }
 
     private void printTwoFilteredPropertyList(Long num, Long occurrences, Predicate<Long> firstFilter
@@ -136,7 +170,7 @@ public class AppRunner {
 
     }
 
-    private void printFilteredPropertyList(Long num, Long occurrences, Predicate<Long> filter) {
+    public void printFilteredPropertyList(Long num, Long occurrences, Predicate<Long> filter) {
         LongStream.iterate(num, i -> i + 1)
                 .boxed()
                 .filter(filter)
@@ -154,6 +188,7 @@ public class AppRunner {
             case "spy" -> SpyNumber.isSpyNumber;
             case "square" -> PerfectSquareNumber.isPerfectSquare;
             case "sunny" -> SunnyNumber.isSunnyNumber;
+            case "jumping" -> JumpingNumber.isJumpingNumber2;
             case "even" -> isEven;
             case "odd" -> isOdd;
             default -> null;
@@ -171,9 +206,10 @@ public class AppRunner {
         if (SpyNumber.isSpyNumber.test(num)) list.add("spy");
         if (PerfectSquareNumber.isPerfectSquare.test(num)) list.add("square");
         if (SunnyNumber.isSunnyNumber.test(num)) list.add("sunny");
+        if (JumpingNumber.isJumpingNumber2.test(num)) list.add("jumping");
         if (isEven.test(num)) list.add("even");
         if (isOdd.test(num)) list.add("odd");
-        System.out.printf("%14d is %s\n", num, String.join(", ", list));
+        System.out.printf("   %,d is %s\n", num, String.join(", ", list));
     }
 
     private void printMultiNumProperties(Long startingNum, Long consecutiveNums) {
@@ -191,6 +227,7 @@ public class AppRunner {
         System.out.printf("%14s%b\n", "spy: ", SpyNumber.isSpyNumber.test(num));
         System.out.printf("%14s%b\n", "square: ", PerfectSquareNumber.isPerfectSquare.test(num));
         System.out.printf("%14s%b\n", "sunny: ", SunnyNumber.isSunnyNumber.test(num));
+        System.out.printf("%14s%b\n", "jumping: ", JumpingNumber.isJumpingNumber2.test(num));
         System.out.printf("%14s%b\n", "even: ", isEven.test(num));
         System.out.printf("%14s%b\n", "odd: ", isOdd.test(num));
         System.out.println();
@@ -213,8 +250,8 @@ public class AppRunner {
                 "- enter a natural number to know its properties;\n" +
                 "- enter two natural numbers to obtain the properties of the list:\n" +
                 "  * the first parameter represents a starting number;\n" +
-                "  * the second parameters show how many consecutive numbers are to be processed;\n" +
-                "- two natural numbers and two properties to search for;\n" +
+                "  * the second parameter shows how many consecutive numbers are to be processed;\n" +
+                "- two natural numbers and properties to search for;\n" +
                 "- separate the parameters with one space;\n" +
                 "- enter 0 to exit.\n");
     }
