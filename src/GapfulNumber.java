@@ -18,6 +18,7 @@ public class GapfulNumber {
     };
 
     public static Predicate<Long> isGapfulNumber = num -> hasAtLeast3Digits.and(isDivisible).test(num);
+    public static Predicate<Long> isNotGapfulNumber = num -> hasAtLeast3Digits.and(isDivisible).negate().test(num);
 }
 
 

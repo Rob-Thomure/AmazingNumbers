@@ -18,5 +18,6 @@ public class SpyNumber {
                     .reduce(1, multiply);
 
     public static Predicate<Long> isSpyNumber = num -> Objects.equals(sum.apply(num), product.apply(num));
+    public static Predicate<Long> isNotSpyNumber = num -> isSpyNumber.negate().test(num);
 
 }

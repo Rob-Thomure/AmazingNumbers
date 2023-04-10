@@ -7,4 +7,5 @@ public class PerfectSquareNumber {
     private static Function<Double, Double> roundDown = Math::floor;
     public static Predicate<Long> isPerfectSquare =
             num -> squareRoot.apply((double) num) - squareRoot.andThen(roundDown).apply((double) num) == 0;
+    public static Predicate<Long> isNotPerfectSquare = num -> isPerfectSquare.negate().test(num);
 }

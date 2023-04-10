@@ -5,4 +5,6 @@ public class DuckNumber {
     private static final Predicate<String> containsZero = numString -> numString.contains("0");
     public static Predicate<Long> isDuckNumber =
             num -> doesNotLeadWithZero.and(containsZero).test(Long.toString(num));
+    public static Predicate<Long> isNotDuckNumber =
+            num -> doesNotLeadWithZero.and(containsZero).negate().test(Long.toString(num));
 }
