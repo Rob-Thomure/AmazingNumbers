@@ -1,3 +1,5 @@
+package converted;
+
 import java.util.function.Predicate;
 
 public class DuckNumber {

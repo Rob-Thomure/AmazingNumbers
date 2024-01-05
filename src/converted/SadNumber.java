@@ -1,3 +1,7 @@
+package converted;
+
+import converted.HappyNumber;
+
 import java.util.function.Predicate;
 
 public class SadNumber {
