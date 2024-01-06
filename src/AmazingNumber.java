@@ -1,83 +1,45 @@
-import converted.HappyNumber;
-
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.function.Predicate;
 
 public class AmazingNumber {
 
     public static boolean isBuzzNumber(long num) {
-        return endsWith7(num) || isDivisibleBy7(num);
+        boolean numEndsWith7 = num % 10 == 7;
+        boolean numIsDivisibleBy7 = num % 7 == 0;
+        return numEndsWith7 || numIsDivisibleBy7;
     }
 
     public static boolean isNotBuzzNumber(long num) {
         return !isBuzzNumber(num);
     }
 
-    private static boolean endsWith7(long num) {
-        return num % 10 == 7;
-    }
-
-    private static boolean isDivisibleBy7(long num) {
-        return num % 7 == 0;
-    }
-
 
 
     public static boolean isDuckNumber(long num) {
-        return doesNotLeadWithZero(num) && containsZero(num);
+        String numString = Long.toString(num);
+        boolean numDoesNotStartWithZero = !numString.startsWith("0");
+        boolean numContainsZero = numString.contains("0");
+        return numDoesNotStartWithZero && numContainsZero;
     }
 
     public static boolean isNotDuckNumber(long num) {
         return !isDuckNumber(num);
     }
 
-    private static boolean startsWithZero(long num) {
-        return Long.toString(num).startsWith("0");
-    }
-
-    private static boolean doesNotLeadWithZero(long num) {
-        return !startsWithZero(num);
-    }
-
-    private static boolean containsZero(long num) {
-        return Long.toString(num).contains("0");
-    }
-
 
 
     public static boolean isGapfulNumber(long num) {
-        return hasAtLeast3Digits(num) && isDivisibleByConcatenationOfFirstAndLastDigits(num);
+        String numString = Long.toString(num);
+        boolean numHasAtLeast3Digits = getDigitLength(num) >= 3;
+        long firstDigitNum =  Long.parseLong(numString.substring(0, 1));
+        long lastDigitNum = Long.parseLong(numString.substring(getDigitLength(num) - 1));
+        long firstDigitConcatLastDigit = (firstDigitNum * 10) + lastDigitNum;
+        boolean numIsDivisibleByFirstDigitConcatLastDigit = num % firstDigitConcatLastDigit == 0;
+        return numHasAtLeast3Digits && numIsDivisibleByFirstDigitConcatLastDigit;
     }
 
     public static boolean isNotGapfulNumber(long num) {
         return !isGapfulNumber(num);
-    }
-
-    private static boolean hasAtLeast3Digits(long num) {
-        return getNumDigits(num) >= 3;
-    }
-
-    private static long getFirstDigit(long num) {
-        return Long.parseLong(Long.toString(num).substring(0, 1));
-    }
-
-    private static long getLastDigit(long num) {
-        return  Long.parseLong(Long.toString(num).substring(getNumDigits(num) - 1));
-    }
-
-    private static int getNumDigits(long num) {
-        return Long.toString(num).length();
-    }
-
-    private static boolean isDivisibleByConcatenationOfFirstAndLastDigits(long num) {
-        long firstAndLastDigit = getFirstAndLastDigit(num);
-        return num % firstAndLastDigit == 0;
-    }
-
-    private static long getFirstAndLastDigit(long num) {
-        long firstDigit = getFirstDigit(num);
-        long lastDigit = getLastDigit(num);
-        return (firstDigit * 10) + lastDigit;
     }
 
 
@@ -100,15 +62,6 @@ public class AmazingNumber {
         return !isHappyNumber(num);
     }
 
-    private static long sumOfAllDigitsSquared(long num) {
-        int squareSum = 0;
-        while (num != 0) {
-            squareSum += (num % 10) * (num % 10);
-            num /= 10;
-        }
-        return squareSum;
-    }
-
 
 
     public static boolean isSadNumber(long num) {
@@ -121,6 +74,107 @@ public class AmazingNumber {
 
 
 
+    public static boolean isJumpingNumber(long num) {
+        long trailingNum = getLastDigit(num);
+        long newNum = num / 10;
+        while (newNum > 0) {
+            long nextTrailingNum = getLastDigit(newNum);
+            if (Math.abs(trailingNum - nextTrailingNum) != 1) {
+                return false;
+            }
+
+            trailingNum = nextTrailingNum;
+            newNum /= 10;
+        }
+        return true;
+    };
+
+    public static boolean isNotJumpingNumber(long num) {
+        return !isJumpingNumber(num);
+    }
 
 
+
+    public static boolean isPalindromic(long num) {
+        return num == reverseDigits(num);
+    }
+
+    public static boolean isNotPalindromic(long num) {
+        return !isPalindromic(num);
+    }
+
+
+
+    public static boolean isPerfectSquare(long num) {
+        double sqrt = Math.sqrt(num);
+        double roundDown = Math.floor(sqrt);
+        return  roundDown == 0;
+    }
+
+    public static boolean isNotPerfectSquare(long num) {
+        return !isPerfectSquare(num);
+    }
+
+
+
+    public static boolean isSpyNumber(long num) {
+        return sumAllDigits(num) == multiplyAllDigits(num);
+    }
+
+    public static boolean isNotSpyNumber(long num) {
+        return !isSpyNumber(num);
+    }
+
+
+
+    public static boolean isSunnyNumber(long num) {
+        long numPlusOne = num + 1;
+        return isPerfectSquare(numPlusOne);
+    }
+
+    public static boolean isNotSunnyNumber(long num) {
+        return !isSunnyNumber(num);
+    }
+
+
+
+
+    private static int getDigitLength(long num) {
+        return Long.toString(num).length();
+    }
+
+    private static long getLastDigit(long num) {
+        return  Long.parseLong(Long.toString(num).substring(getDigitLength(num) - 1));
+    }
+
+    private static long sumOfAllDigitsSquared(long num) {
+        int squareSum = 0;
+        while (num != 0) {
+            squareSum += (num % 10) * (num % 10);
+            num /= 10;
+        }
+        return squareSum;
+    }
+
+    private static long reverseDigits(long num) {
+        return Long.parseLong(new StringBuilder(Long.toString(num)).reverse().toString());
+    }
+
+    private static long sumAllDigits(long num) {
+        return Arrays.stream(Long.toString(num)
+                        .split(""))
+                .mapToLong(Long::parseLong)
+                .sum();
+    }
+
+    private static long multiplyAllDigits(long num) {
+        return Arrays.stream(Long.toString(num)
+                        .split(""))
+                .map(Long::parseLong)
+                .reduce(1L, AmazingNumber::multiply);
+    }
+
+    private static long multiply(long num1, long num2) {
+        return num1 * num2;
+    }
 }

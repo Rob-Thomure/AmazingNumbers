@@ -1,6 +1,4 @@
-package converted;
-
-import converted.HappyNumber;
+package amazingNumberHelpers;
 
 import java.util.function.Predicate;
 
@@ -11,5 +9,9 @@ public class SadNumber {
 
     public static boolean isSadNumber(long num) {
         return HappyNumber.isNotHappyNumber(num);
+    }
+
+    public static boolean isNotSadNumber(long num) {
+        return HappyNumber.isHappyNumber(num);
     }
 }
