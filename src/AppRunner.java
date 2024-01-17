@@ -2,6 +2,7 @@ import amazingNumberHelpers.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -44,7 +45,9 @@ public class AppRunner {
 
     public void executeOneParameter(List<String> parameters) {
         if (isNumber.and(isNaturalNumber).test(parameters.get(0))) {
-            printSingleNumProperties(Long.parseLong(parameters.get(0)));
+            int num = Integer.parseInt(parameters.get(0));
+            AmazingNumber amazingNumber = new AmazingNumber(num);
+            printSingleNumProperties(amazingNumber);
         } else {
             System.out.println("The first parameter should be a natural number or zero.\n");
         }
@@ -200,20 +203,13 @@ public class AppRunner {
         System.out.println();
     }
 
-    private void printSingleNumProperties(long num) {
+    private void printSingleNumProperties(AmazingNumber amazingNumber) {
+        Map<String, Boolean> properties = amazingNumber.getProperties();
+        int num = amazingNumber.getNum();
         System.out.printf("Properties of %,d\n", num);
-        System.out.printf("%14s%b\n", "buzz: ", BuzzNumber.isBuzzNumber.test(num));
-        System.out.printf("%14s%b\n", "duck: ", DuckNumber.isDuckNumber.test(num));
-        System.out.printf("%14s%b\n", "palindromic: ", PalindromicNumber.isPalindromic.test(num));
-        System.out.printf("%14s%b\n", "gapful: ", GapfulNumber.isGapfulNumber.test(num));
-        System.out.printf("%14s%b\n", "spy: ", SpyNumber.isSpyNumber.test(num));
-        System.out.printf("%14s%b\n", "square: ", PerfectSquareNumber.isPerfectSquare.test(num));
-        System.out.printf("%14s%b\n", "sunny: ", SunnyNumber.isSunnyNumber.test(num));
-        System.out.printf("%14s%b\n", "jumping: ", JumpingNumber.isJumpingNumber.test(num));
-        System.out.printf("%14s%b\n", "happy: ", HappyNumber.isHappyNumber(num));
-        System.out.printf("%14s%b\n", "sad: ", SadNumber.isSadNumber(num));
-        System.out.printf("%14s%b\n", "even: ", isEven.test(num));
-        System.out.printf("%14s%b\n", "odd: ", isOdd.test(num));
+        properties.forEach((key, value) -> {
+            System.out.printf("%14s: %b\n", key, value);
+        });
         System.out.println();
     }
 
@@ -230,15 +226,17 @@ public class AppRunner {
     }
 
     private void printInstructions() {
-        System.out.println("Supported requests:\n" +
-                "- enter a natural number to know its properties;\n" +
-                "- enter two natural numbers to obtain the properties of the list:\n" +
-                "  * the first parameter represents a starting number;\n" +
-                "  * the second parameter shows how many consecutive numbers are to be printed;\n" +
-                "- two natural numbers and properties to search for;\n" +
-                "- a property preceded by minus must not be present in numbers;\n" +
-                "- separate the parameters with one space;\n" +
-                "- enter 0 to exit.\n");
+        System.out.println("""
+                Supported requests:
+                - enter a natural number to know its properties;
+                - enter two natural numbers to obtain the properties of the list:
+                  * the first parameter represents a starting number;
+                  * the second parameter shows how many consecutive numbers are to be printed;
+                - two natural numbers and properties to search for;
+                - a property preceded by minus must not be present in numbers;
+                - separate the parameters with one space;
+                - enter 0 to exit.
+                """);
     }
 
 
