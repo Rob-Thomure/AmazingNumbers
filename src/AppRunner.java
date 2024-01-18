@@ -6,13 +6,10 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 public class AppRunner {
-    private final List<List<String>> mutuallyExclusiveProperties = List.of(
-            List.of("EVEN", "ODD")
-            , List.of("DUCK", "SPY")
-            , List.of("SUNNY", "SQUARE"));
     private final Predicate<String> isNumber = str -> str.matches("\\d+");
     private final Predicate<String> isNaturalNumber = num -> Long.parseLong(num) > 0;
     public static final Predicate<Long> isEven = num -> num % 2 == 0;
@@ -140,13 +137,17 @@ public class AppRunner {
         System.out.println();
     }
 
-    public void printFilteredPropertyList(Long num, Long occurrences, Predicate<Long> filter) {
+    public void printFilteredPropertyList(long num, long occurrences, Predicate<Long> filter) {
         LongStream.iterate(num, i -> i + 1)
                 .boxed()
                 .filter(filter)
                 .limit(occurrences)
                 .forEach(this::printPropertyList);
         System.out.println();
+
+
+
+
     }
 
     private Predicate<Long> getFilter(String filter) {
@@ -180,6 +181,8 @@ public class AppRunner {
         };
     }
 
+
+
     private void printPropertyList(Long num) {
         List<String> list = new ArrayList<>();
         if (isEven.test(num)) list.add("even");
@@ -197,10 +200,20 @@ public class AppRunner {
         System.out.printf("   %,d is %s\n", num, String.join(", ", list));
     }
 
-    private void printMultiNumProperties(Long startingNum, Long consecutiveNums) {
-        LongStream.range(startingNum, startingNum + consecutiveNums)
+    private void printPropertyList(AmazingNumber amazingNumber) {
+        Map<String, Boolean> properties = amazingNumber.getProperties();
+        String propertyString = properties.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() == true)
+                .map(entry -> entry.getKey())
+                .collect(Collectors.joining(", "));
+        System.out.printf("   %,d is %s\n", amazingNumber.getNum(), propertyString);
+    }
+
+    private void printMultiNumProperties(long startingNum, long consecutiveNums) {
+        IntStream.range((int) startingNum, (int) (startingNum + consecutiveNums))
+                .mapToObj(AmazingNumber::new)
                 .forEach(this::printPropertyList);
-        System.out.println();
     }
 
     private void printSingleNumProperties(AmazingNumber amazingNumber) {

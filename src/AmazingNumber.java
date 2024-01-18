@@ -22,6 +22,8 @@ public class AmazingNumber {
     }
 
     private void addProperties() {
+        properties.put("even", isEvenNumber());
+        properties.put("odd", isOddNumber());
         properties.put("buzz", isBuzzNumber());
         properties.put("duck", isDuckNumber());
         properties.put("palindromic", isPalindromic());
@@ -32,8 +34,6 @@ public class AmazingNumber {
         properties.put("jumping", isJumpingNumber());
         properties.put("happy", isHappyNumber());
         properties.put("sad", isSadNumber());
-        properties.put("even", isEvenNumber());
-        properties.put("odd", isOddNumber());
     }
 
     private boolean isEvenNumber() {
@@ -55,9 +55,6 @@ public class AmazingNumber {
         return numEndsWith7 || numIsDivisibleBy7;
     }
 
-
-
-
     public boolean isDuckNumber() {
         String numString = Long.toString(num);
         boolean numDoesNotStartWithZero = !numString.startsWith("0");
@@ -74,9 +71,6 @@ public class AmazingNumber {
         boolean numIsDivisibleByFirstDigitConcatLastDigit = num % firstDigitConcatLastDigit == 0;
         return numHasAtLeast3Digits && numIsDivisibleByFirstDigitConcatLastDigit;
     }
-
-
-
 
     public boolean isHappyNumber() {
         HashSet<Integer> hashSet = new HashSet<>();
@@ -134,17 +128,15 @@ public class AmazingNumber {
     }
 
     private long getLastDigit(long num) {
-        return  Long.parseLong(Long.toString(num).substring(getDigitLength() - 1));
+        return num % 10;
     }
 
     private int sumOfAllDigitsSquared(int num) {
-        int squareSum = 0;
-        int newNum = num;
-        while (newNum != 0) {
-            squareSum += (newNum % 10) * (newNum % 10);
-            newNum /= 10;
-        }
-        return squareSum;
+        return Arrays.stream(Integer.toString(num).split(""))
+                .map(Integer::parseInt)
+                .map(this::squared)
+                .reduce(Integer::sum)
+                .get();
     }
 
     private long reverseDigits() {
@@ -168,4 +160,10 @@ public class AmazingNumber {
     private long multiply(long num1, long num2) {
         return num1 * num2;
     }
+
+    private int squared(int num) {
+        return num * num;
+    }
+
+
 }
