@@ -23,6 +23,7 @@ public class AppRunner {
         printInstructions();
         while (!exit) {
             List<String> userRequest = getRequestFromUser();
+
             if (userRequest.get(0).isEmpty()) {
                 printInstructions();
             } else if (userRequest.get(0).equals("0")) {
