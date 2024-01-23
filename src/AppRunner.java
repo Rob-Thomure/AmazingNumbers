@@ -10,8 +10,6 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 public class AppRunner {
-    private final Predicate<String> isNumber = str -> str.matches("\\d+");
-    private final Predicate<String> isNaturalNumber = num -> Long.parseLong(num) > 0;
     public static final Predicate<Long> isEven = num -> num % 2 == 0;
     public static final Predicate<Long> isNotEven = num -> isEven.negate().test(num);
     public static final Predicate<Long> isOdd = num -> num % 2 != 0;
@@ -24,109 +22,55 @@ public class AppRunner {
         while (!exit) {
             List<String> userRequest = getRequestFromUser();
 
-            if (userRequest.get(0).isEmpty()) {
-                printInstructions();
-            } else if (userRequest.get(0).equals("0")) {
-                System.out.println("Goodbye!");
-                exit = true;
-            } else if (userRequest.size() == 1) {
-                executeOneParameter(userRequest);
-            } else if (userRequest.size() == 2) {
-                executeTwoParameters(userRequest);
-            } else if (userRequest.size() == 3) {
-                executeThreeParameters(userRequest);
-            } else if (userRequest.size() >= 4) {
-                executeFourParameter(userRequest);
+            InputValidator inputValidator = new InputValidator(userRequest);
+            if (inputValidator.isValid()) {
+                if (userRequest.get(0).equals("0")) {
+                    System.out.println("Goodbye!");
+                    exit = true;
+                } else if (userRequest.size() == 1) {
+                    executeOneParameter(userRequest);
+                } else if (userRequest.size() == 2) {
+                    executeTwoParameters(userRequest);
+                } else if (userRequest.size() == 3) {
+                    executeThreeParameters(userRequest);
+                } else {
+                    executeFourParameter(userRequest);
+                }
             }
+
+
         }
     }
 
     public void executeOneParameter(List<String> parameters) {
-        if (isNumber.and(isNaturalNumber).test(parameters.get(0))) {
-            int num = Integer.parseInt(parameters.get(0));
-            AmazingNumber amazingNumber = new AmazingNumber(num);
-            printSingleNumProperties(amazingNumber);
-        } else {
-            System.out.println("The first parameter should be a natural number or zero.\n");
-        }
+        int num = Integer.parseInt(parameters.get(0));
+        AmazingNumber amazingNumber = new AmazingNumber(num);
+        printSingleNumProperties(amazingNumber);
     }
 
     public void executeTwoParameters(List<String> parameters) {
-        if (isNumber.and(isNaturalNumber).negate().test(parameters.get(0))) {
-            System.out.println("The first parameter should be a natural number or zero.\n");
-        } else if (isNumber.and(isNaturalNumber).negate().test(parameters.get(1))) {
-            System.out.println("The second parameter should be a natural number or zero.\n");
-        } else {
-            printMultiNumProperties(Long.parseLong(parameters.get(0)), Long.parseLong(parameters.get(1)));
-        }
+        printMultiNumProperties(Long.parseLong(parameters.get(0)), Long.parseLong(parameters.get(1)));
     }
 
     public void executeThreeParameters(List<String> parameters) {
-        if (isNumber.and(isNaturalNumber).negate().test(parameters.get(0))) {
-            System.out.println("The first parameter should be a natural number or zero.\n");
-        } else if (isNumber.and(isNaturalNumber).negate().test(parameters.get(1))) {
-            System.out.println("The second parameter should be a natural number or zero.\n");
-        } else {
-            Predicate<Long> filter = getFilter(parameters.get(2));
-            if (null != filter) {
-                printFilteredPropertyList(Long.parseLong(parameters.get(0)), Long.parseLong(parameters.get(1)), filter);
-            } else {
-                List<String> properties = List.of(parameters.get(2));
-                printInvalidProperties(properties);
-            }
-        }
+        Predicate<Long> filter = getFilter(parameters.get(2));
+        printFilteredPropertyList(Long.parseLong(parameters.get(0)), Long.parseLong(parameters.get(1)), filter);
     }
 
     public void executeFourParameter(List<String> parameters) {
         List<String> properties = parameters.stream()
                 .skip(2)
                 .toList();
-        if (isNumber.and(isNaturalNumber).negate().test(parameters.get(0))) {
-            System.out.println("The first parameter should be a natural number or zero.\n");
-        } else if (isNumber.and(isNaturalNumber).negate().test(parameters.get(1))) {
-            System.out.println("The second parameter should be a natural number or zero.\n");
-        } else if (!isValidProperties(properties)) {
-            List<String> invalidProperties = createInvalidPropertyList(properties);
-            printInvalidProperties(invalidProperties);
-        } else if (MutuallyExclusiveProperties.isMutuallyExclusiveProperties(properties)) {
-            System.out.printf("The request contains mutually exclusive properties: [%s]\n" +
-                    "There are no numbers with these properties.\n\n", String.join(", ",
-                    MutuallyExclusiveProperties.getMatchingMutuallyExclusiveProperties(properties)));
-        } else if (!MutuallyExclusiveProperties.isMutuallyExclusiveProperties(properties)
-                    && isValidProperties(properties)) {
-            Predicate<Long> compositePredicate =  composePredicates(properties);
-            printMultiFilteredPropertyList(Long.parseLong(parameters.get(0)), Long.parseLong(parameters.get(1)),
-                    compositePredicate);
-        }
-    }
 
-    public boolean isValidProperties(List<String> properties) {
-        return ValidProperties.containsAll(properties);
+        Predicate<Long> compositePredicate =  composePredicates(properties);
+        printMultiFilteredPropertyList(Long.parseLong(parameters.get(0)), Long.parseLong(parameters.get(1)),
+                compositePredicate);
     }
 
     public Predicate<Long> composePredicates(List<String> parameters) {
          return parameters.stream()
                 .map(this::getFilter)
                 .reduce(pr -> true, Predicate::and);
-    }
-
-    private List<String> createInvalidPropertyList(List<String> properties) {
-        return properties.stream()
-                .filter(str -> !ValidProperties.contains(str))
-                .collect(Collectors.toList());
-    }
-
-    private void printInvalidProperties(List<String> properties) {
-        String validProperties = String.join(", ", ValidProperties.getStringValues());
-        if (properties.size() == 1) {
-            System.out.printf("The property [%s] is wrong.\n" +
-                    "Available properties: [%s]\n\n"
-                    ,properties.get(0), validProperties);
-        } else if (properties.size() >= 2) {
-            System.out.printf("The properties [%s] are wrong.\n" +
-                    "Available properties: [%s]\n\n"
-                    ,String.join(", ", properties), validProperties);
-        }
     }
 
     private void printMultiFilteredPropertyList(Long num, Long occurrences, Predicate<Long> compositeFilter) {
@@ -206,7 +150,7 @@ public class AppRunner {
         String propertyString = properties.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue() == true)
-                .map(entry -> entry.getKey())
+                .map(Map.Entry::getKey)
                 .collect(Collectors.joining(", "));
         System.out.printf("   %,d is %s\n", amazingNumber.getNum(), propertyString);
     }
@@ -215,15 +159,14 @@ public class AppRunner {
         IntStream.range((int) startingNum, (int) (startingNum + consecutiveNums))
                 .mapToObj(AmazingNumber::new)
                 .forEach(this::printPropertyList);
+        System.out.println();
     }
 
     private void printSingleNumProperties(AmazingNumber amazingNumber) {
         Map<String, Boolean> properties = amazingNumber.getProperties();
         int num = amazingNumber.getNum();
         System.out.printf("Properties of %,d\n", num);
-        properties.forEach((key, value) -> {
-            System.out.printf("%14s: %b\n", key, value);
-        });
+        properties.forEach((key, value) -> System.out.printf("%14s: %b\n", key, value));
         System.out.println();
     }
 
@@ -232,6 +175,8 @@ public class AppRunner {
         System.out.print("Enter a request: ");
         String request = scanner.nextLine();
         System.out.println();
+
+        if (request.isEmpty()) return List.of();
         return List.of(request.split("\\s+"));
     }
 

@@ -10,13 +10,30 @@ public class InputValidator {
 
     public boolean isValid() {
         return switch (userRequest.size()) {
-            case 0 -> false;
+            case 0 -> printInstructions();
             case 1 -> firstParamIsValid();
             case 2 -> firstParamIsValid() && secondParamIsValid();
             case 3 -> firstParamIsValid() && secondParamIsValid() && isValidParameterNames();
             default -> firstParamIsValid() && secondParamIsValid() && isValidParameterNames()
                     && isMutuallyExclusiveProperties();
         };
+    }
+
+
+
+    private boolean printInstructions() {
+        System.out.println("""
+                Supported requests:
+                - enter a natural number to know its properties;
+                - enter two natural numbers to obtain the properties of the list:
+                  * the first parameter represents a starting number;
+                  * the second parameter shows how many consecutive numbers are to be printed;
+                - two natural numbers and properties to search for;
+                - a property preceded by minus must not be present in numbers;
+                - separate the parameters with one space;
+                - enter 0 to exit.
+                """);
+        return false;
     }
 
     private boolean firstParamIsValid() {
@@ -42,6 +59,7 @@ public class InputValidator {
             String param = userRequest.get(i);
             if (!ValidProperties.contains(param)) {
                 System.out.println("InvalidParameter: " + param);
+                System.out.println();
                 return false;
             }
         }
