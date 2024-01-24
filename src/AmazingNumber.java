@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class AmazingNumber {
     private int num;
-    Map<String, Boolean> properties;
+    private Map<String, Boolean> properties;
 
     public AmazingNumber(int num) {
         this.num = num;
@@ -165,5 +165,11 @@ public class AmazingNumber {
         return num * num;
     }
 
-
+    @Override
+    public String toString() {
+        return "AmazingNumber{" +
+                "num=" + num +
+                ", properties=" + properties +
+                '}';
+    }
 }

@@ -5,6 +5,5 @@ public class Main {
         AppRunner appRunner = new AppRunner();
         appRunner.runApp();
     }
-
 }
 
