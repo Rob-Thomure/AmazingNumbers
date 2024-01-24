@@ -4,8 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class AmazingNumber {
-    private int num;
-    private Map<String, Boolean> properties;
+    private final int num;
+    private final Map<String, Boolean> properties;
 
     public AmazingNumber(int num) {
         this.num = num;
@@ -102,7 +102,7 @@ public class AmazingNumber {
             newNum /= 10;
         }
         return true;
-    };
+    }
 
     public boolean isPalindromic() {
         return num == reverseDigits();
